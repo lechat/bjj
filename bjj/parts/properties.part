@@ -1,0 +1,39 @@
+
+    parameters:
+    {% for tag, prop in el['hudson.model.ParametersDefinitionProperty']['parameterDefinitions'].iteritems() %}
+    {% if tag == 'hudson.model.StringParameterDefinition' %}
+        - string:
+            name: '{{ prop.name }}'
+            default: '{{ prop.defaultValue }}'
+            description: '{{ prop.description }}'
+    {% elif tag == 'hudson.model.BooleanParameterDefinition' %}
+        - bool:
+            name: '{{ prop.name }}'
+            default: '{{ prop.defaultValue }}'
+            description: '{{ prop.description }}'
+    {% elif tag == 'hudson.model.ChoiceParameterDefinition' %}
+        - choice:
+            name: '{{ prop.name }}'
+            ## TODO: Handle multiline values
+            description: '{{ prop.description }}'
+            choices:
+            {% for ch in prop.choices.a.string %}
+                - {{ ch }}
+            {% endfor %}
+    {% elif tag == 'hudson.model.FileParameterDefinition' %}
+        - file:
+            name: '{{ prop.name }}'
+            description: '{{ prop.description }}'
+    {% elif tag == 'hudson.model.PasswordParameterDefinition' %}
+        - password:
+            name: '{{ prop.name }}'
+            default: '{{ prop.defaultValue }}'
+            description: '{{ prop.description }}'
+    {% elif tag == 'hudson.model.TextParameterDefinition' %}
+        - text:
+            name: '{{ prop.name }}'
+            default: |
+                {{ prop.defaultValue }}
+            description: '{{ prop.description }}'
+    {% endif %}
+    {% endfor %}

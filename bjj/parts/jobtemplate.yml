@@ -1,0 +1,28 @@
+- job:
+    block-downstream: {{ et.find('blockBuildWhenDownstreamBuilding').text }}
+    block-upstream: {{ et.find('blockBuildWhenUpstreamBuilding').text }}
+    builders:
+    {% for bl in et.find('builders') %}
+        {% if bl.tag == 'hudson.tasks.Shell' %}
+        - shell: |
+            {{ bl.find('command').text }}
+        {% endif %}
+        {% if bl.tag == 'hudson.tasks.Maven' %}
+        - maven:
+            targets: "{{ bl.find('targets').text }}"
+        {% endif %}
+    {% endfor %}
+    concurrent: false
+    description: null
+    disabled: false
+    name: ./config.xml
+    parameters:
+    - string:
+        default: ''
+        description: ''
+        name: STR_PARAM
+    project-type: freestyle
+    properties: []
+    publishers: []
+    triggers: []
+    wrappers: []
