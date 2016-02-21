@@ -71,7 +71,9 @@ class TemplatedConverter(object):
     def __init__(self, parts_path='parts'):
         self.env = Environment(loader=PackageLoader('bjj', parts_path),
                                trim_blocks=True,
-                               lstrip_blocks=True)
+                               lstrip_blocks=True,
+                               line_statement_prefix='#',
+                               line_comment_prefix='## ')
 
     def _parse_element(self, el_name, el_data):
         part = self.env.get_template(el_name + '.part')
@@ -105,14 +107,11 @@ class TemplatedConverter(object):
         for name, et in it:
             yaml = self._convert(et, name)
             yaml_filename = name + '.yml'
-            print yaml
-            # with open(yaml_filename, 'w') as of:
-            #     of.write(yaml)
+            with open(yaml_filename, 'w') as of:
+                of.write(yaml)
 
 
-if __name__ == '__main__':
-    args = docopt(__doc__)
-
+def main(args):
     if args['convertfile']:
         conv = FileIterator(args['--path'])
     else:
@@ -124,3 +123,9 @@ if __name__ == '__main__':
         )
 
     TemplatedConverter().convert(conv)
+
+
+if __name__ == '__main__':
+    args = docopt(__doc__)
+
+    main(args)
