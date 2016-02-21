@@ -111,7 +111,9 @@ class TemplatedConverter(object):
                 of.write(yaml)
 
 
-def main(args):
+def main():
+    args = docopt(__doc__)
+
     if args['convertfile']:
         conv = FileIterator(args['--path'])
     else:
@@ -126,6 +128,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    args = docopt(__doc__)
-
-    main(args)
+    main()
