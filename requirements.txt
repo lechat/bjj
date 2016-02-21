@@ -1,0 +1,5 @@
+Jinja2
+PyYAML
+docopt
+jenkinsapi
+xmltodict
