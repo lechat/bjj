@@ -39,11 +39,17 @@ yaml.add_representer(literal_unicode, literal_unicode_representer)
 
 class FileIterator(object):
     def __init__(self, files):
-        self.files = files
+        if isinstance(files, str):
+            self.files = [files]
+        else:
+            self.files = files
 
     def __iter__(self):
         for xml_file in self.files:
             yield xml_file, self._et_from_file(xml_file)
+
+    def __len__(self):
+        return len(self.files)
 
     def _et_from_file(self, filename):
         with open(filename, 'r') as xml:
