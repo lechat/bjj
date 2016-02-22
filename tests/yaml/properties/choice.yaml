@@ -1,0 +1,9 @@
+    parameters:
+    - choice:
+        name: 'CH_PARAM'
+        description: 'Make a choice'
+        choices:
+            - One
+            - Two
+            - Three
+

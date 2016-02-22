@@ -1,0 +1,6 @@
+    parameters:
+    - bool:
+        default: true
+        description: 'Boolean something'
+        name: BOOL_PARAM
+

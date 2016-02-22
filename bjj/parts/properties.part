@@ -4,12 +4,12 @@
     # if tag == 'hudson.model.StringParameterDefinition'
         - string:
             name: '{{ prop.name }}'
-            default: '{{ prop.defaultValue }}'
-            description: '{{ prop.description }}'
+            default: '{{ prop.defaultValue|default('', boolean=True) }}'
+            description: '{{ prop.description|default('', boolean=True) }}'
     # elif tag == 'hudson.model.BooleanParameterDefinition'
         - bool:
             name: '{{ prop.name }}'
-            default: '{{ prop.defaultValue }}'
+            default: {{ prop.defaultValue|default(false)|lower() }}
             description: '{{ prop.description }}'
     # elif tag == 'hudson.model.ChoiceParameterDefinition'
         - choice:
@@ -31,7 +31,7 @@
     # elif tag == 'hudson.model.TextParameterDefinition'
         - text:
             name: '{{ prop.name }}'
-            default: |
+            default:
                 {{ prop.defaultValue }}
             description: '{{ prop.description }}'
     # endif

@@ -1,0 +1,6 @@
+    parameters:
+    - string:
+        default: ''
+        description: ''
+        name: STR_PARAM
+
