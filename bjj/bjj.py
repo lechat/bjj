@@ -17,9 +17,10 @@ from docopt import docopt
 import logging
 from jenkinsapi.jenkins import Jenkins
 import yaml
-from jinja2 import Environment, PackageLoader, TemplateNotFound
+from jinja2 import Environment, PackageLoader
 import xmltodict
 import json
+from pkg_resources import resource_string
 
 
 logging.basicConfig(level=logging.INFO)
@@ -57,6 +58,10 @@ class FileIterator(object):
         return x_dict
 
 
+class NoTemplate(Exception):
+    pass
+
+
 class JenkinsIterator(object):
     def __init__(self, jenkins_url, user, passwd, regex):
         self.jenkins = Jenkins(jenkins_url, user, passwd)
@@ -81,10 +86,27 @@ class TemplatedConverter(object):
                                line_statement_prefix='#',
                                line_comment_prefix='## ')
 
-    def _parse_element(self, el_name, el_data):
-        part = self.env.get_template(el_name + '.part')
-        result = part.render(el=el_data)
-        return result
+    def _parse_top_element(self, el_name, el_data):
+        import pudb; pudb.set_trace()  # XXX BREAKPOINT
+        part = resource_string(__name__, 'parts/' + el_name + '/base.part')
+        tpl = self.env.from_string(part)
+        result = tpl.render(**el_data[el])
+        result += _parse_element(el_name, el_data)
+
+    def _parse_element(self, el_name, el_data, path='parts'):
+        result = []
+        if not isinstance(el_data, dict):
+            raise NoTemplate(path)
+        for el in el_data:
+            try:
+                rel_path = path + '/' + el_name
+                part = resource_string(__name__, rel_path + '/' + el + '.part')
+                tpl = self.env.from_string(part)
+                result.append(tpl.render(**el_data[el]))
+            except IOError:
+                result.append(self._parse_element(el, el_data[el], rel_path))
+
+        return ''.join(result)
 
     def _convert(self, et, name):
         """
@@ -93,16 +115,18 @@ class TemplatedConverter(object):
         print json.dumps(et, indent=2)
 
         # Top level element is parsed here
-        job = self._parse_element(et.keys()[0], None)
+        job = self._parse_element(et.keys()[0], et)
 
         for name, data in et['project'].iteritems():
+            if not isinstance(data, dict):
+                continue
             try:
-                job += self._parse_element(name, data)
-            except TemplateNotFound:
+                job += self._parse_top_element(name, data)
+            except NoTemplate as tnf:
                 logger.warning(
-                    'Template "parts/{name}.part" not found. '
-                    'Perhaps XML tag "{name}" is not implemented yet'
-                    .format(name=name))
+                    'Template "{}.part" not found. '
+                    'Perhaps XML tag "{}" is not implemented yet'
+                    .format(tnf.message, name))
         return job
 
     def convert(self, it):
@@ -113,6 +137,7 @@ class TemplatedConverter(object):
         for name, et in it:
             yaml = self._convert(et, name)
             yaml_filename = name + '.yml'
+            import pudb; pudb.set_trace()  # XXX BREAKPOINT
             with open(yaml_filename, 'w') as of:
                 of.write(yaml)
 

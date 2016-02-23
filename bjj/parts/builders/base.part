@@ -1,0 +1,13 @@
+
+    builders:
+{% block content %}
+# for name, b in el.iteritems()
+    # if name == 'hudson.tasks.Shell'
+        - shell: |
+{{ b.command }}
+    # elif name == 'hudson.tasks.Maven'
+        - maven-target:
+            goals: '{{ b.targets }}'
+            private-repository: {{ b.usePrivateRepository|lower() }}
+    # endif
+{% endblock %}

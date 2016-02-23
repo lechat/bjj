@@ -1,0 +1,6 @@
+- project:
+    project-type: freestyle
+    block-downstream: {{ blockBuildWhenDownstreamBuilding|lower() }}
+    block-upstream: {{ blockBuildWhenUpstreamBuilding|lower() }}
+    concurrent: {{ concurrentBuild|lower() }}
+    description: '{{ description|default('', true) }}'

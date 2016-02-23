@@ -1,0 +1,6 @@
+{% extends "properties/base.part" %}
+{% block content %}
+        - shell: |
+{{ command }}
+{% endblock %}
+

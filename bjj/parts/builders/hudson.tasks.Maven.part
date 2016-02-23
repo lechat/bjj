@@ -1,0 +1,6 @@
+{% extends "properties/base.part" %}
+{% block content %}
+        - maven-target:
+            goals: '{{ targets }}'
+            private-repository: {{ usePrivateRepository|lower() }}
+{% endblock %}

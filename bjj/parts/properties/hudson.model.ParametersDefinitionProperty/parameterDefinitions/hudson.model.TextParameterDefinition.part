@@ -1,0 +1,9 @@
+{% extends "properties/base.part" %}
+{% block content %}
+        - text:
+            name: '{{ name }}'
+            default:
+                {{ defaultValue }}
+            description: '{{ description }}'
+{% endblock %}
+

@@ -1,0 +1,7 @@
+{% extends "properties/base.part" %}
+{% block content %}
+        - file:
+            name: '{{ name }}'
+            description: '{{ description }}'
+{% endblock %}
+

@@ -1,0 +1,7 @@
+{% extends "properties/base.part" %}
+{% block content %}
+        - string:
+            name: '{{ name }}'
+            default: '{{ defaultValue|default('', boolean=True) }}'
+            description: '{{ description|default('', boolean=True) }}'
+{% endblock %}

@@ -1,0 +1,7 @@
+        - choice:
+            name: '{{ name }}'
+            description: '{{ description }}'
+            choices:
+            # for ch in choices.a.string
+                - {{ ch }}
+            # endfor

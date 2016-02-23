@@ -1,0 +1,10 @@
+{% extends "properties/base.part" %}
+{% block content %}
+        - choice:
+            name: '{{ el.name }}'
+            description: '{{ el.description }}'
+            choices:
+            # for ch in el.choices.a.string
+                - {{ ch }}
+            # endfor
+{% endblock %}
