@@ -87,11 +87,10 @@ class TemplatedConverter(object):
                                line_comment_prefix='## ')
 
     def _parse_top_element(self, el_name, el_data):
-        import pudb; pudb.set_trace()  # XXX BREAKPOINT
         part = resource_string(__name__, 'parts/' + el_name + '/base.part')
         tpl = self.env.from_string(part)
-        result = tpl.render(**el_data[el])
-        result += _parse_element(el_name, el_data)
+        result = tpl.render(**el_data[el_name])
+        result += self._parse_element(el_name, el_data)
 
     def _parse_element(self, el_name, el_data, path='parts'):
         result = []
@@ -137,7 +136,6 @@ class TemplatedConverter(object):
         for name, et in it:
             yaml = self._convert(et, name)
             yaml_filename = name + '.yml'
-            import pudb; pudb.set_trace()  # XXX BREAKPOINT
             with open(yaml_filename, 'w') as of:
                 of.write(yaml)
 
