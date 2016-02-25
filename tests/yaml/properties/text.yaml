@@ -1,6 +1,0 @@
-    parameters:
-    - text:
-        default: 'some text'
-        description: 'Text param'
-        name: TEXT_PARAM
-

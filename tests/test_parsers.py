@@ -7,17 +7,22 @@ from bjj import bjj
 
 
 def find_file_pairs():
-    for path, _, filelist in os.walk('./tests/xml'):
-        for name in fnmatch.filter(filelist, '*.xml'):
+    for path, _, filelist in os.walk('./tests/parts'):
+        for name in fnmatch.filter(filelist, '*.yaml'):
             part_name = path.split('/')[-1]
-            xml_file = xmltodict.parse(open(join(path, name), 'r'))
-
             test_name = name.split('.')[0]
-            yaml_name = join(
-                './tests/yaml', part_name, test_name + '.yaml'
-            )
-            yaml_file = yaml.load(open(yaml_name, 'r'))
-            yield part_name, test_name, xml_file, yaml_file
+
+            test_case = yaml.load(open(join(path, name), 'r'))
+
+            xml_dict = xmltodict.parse(test_case['xml'])
+            if isinstance(test_case['yaml'], dict):
+                yaml_dict = test_case['yaml']
+            elif isinstance(test_case['yaml'], list):
+                yaml_dict = test_case['yaml']
+            else:
+                yaml_dict = yaml.load(test_case['yaml'])
+
+            yield part_name, test_name, xml_dict, yaml_dict
 
 
 def pytest_generate_tests(metafunc):
@@ -31,4 +36,9 @@ def pytest_generate_tests(metafunc):
 def test__parse_element(part, test, xml_d, yaml_d):
     conv = bjj.TemplatedConverter()
 
-    assert yaml.load(conv._parse_element(part, xml_d)) == yaml_d
+    if test == 'project':
+        converted = conv._convert(xml_d)
+        assert yaml.load(converted) == yaml_d
+    else:
+        converted = conv._parse_element(part, xml_d)
+        assert yaml.load(converted) == yaml_d

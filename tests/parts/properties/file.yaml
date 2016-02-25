@@ -1,0 +1,13 @@
+yaml: |
+    - file:
+        name: '/some/file'
+        description: 'Some file'
+xml: |
+    <hudson.model.ParametersDefinitionProperty>
+        <parameterDefinitions>
+            <hudson.model.FileParameterDefinition>
+            <name>/some/file</name>
+            <description>Some file</description>
+            </hudson.model.FileParameterDefinition>
+        </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>

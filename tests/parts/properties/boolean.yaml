@@ -1,0 +1,15 @@
+'xml': |
+    <hudson.model.ParametersDefinitionProperty>
+        <parameterDefinitions>
+            <hudson.model.BooleanParameterDefinition>
+            <name>BOOL_PARAM</name>
+            <description>Boolean something</description>
+            <defaultValue>true</defaultValue>
+            </hudson.model.BooleanParameterDefinition>
+        </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+'yaml': |
+    - bool:
+        default: true
+        description: 'Boolean something'
+        name: BOOL_PARAM

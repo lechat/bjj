@@ -1,5 +1,0 @@
-    parameters:
-    - file:
-        name: '/some/file'
-        description: 'Some file'
-

@@ -1,0 +1,15 @@
+yaml: |
+    - text:
+        default: 'some text'
+        description: 'Text param'
+        name: TEXT_PARAM
+xml: |
+    <hudson.model.ParametersDefinitionProperty>
+        <parameterDefinitions>
+            <hudson.model.TextParameterDefinition>
+            <name>TEXT_PARAM</name>
+            <description>Text param</description>
+            <defaultValue>some text</defaultValue>
+            </hudson.model.TextParameterDefinition>
+        </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>

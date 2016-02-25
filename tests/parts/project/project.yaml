@@ -1,0 +1,55 @@
+xml: |
+    <project>
+    <actions/>
+    <description></description>
+    <keepDependencies>false</keepDependencies>
+    <properties>
+        <hudson.model.ParametersDefinitionProperty>
+        <parameterDefinitions>
+            <hudson.model.StringParameterDefinition>
+            <name>STR_PARAM</name>
+            <description>String something</description>
+            <defaultValue></defaultValue>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.BooleanParameterDefinition>
+            <name>BOOL_PARAM</name>
+            <description>Boolean something</description>
+            <defaultValue>true</defaultValue>
+            </hudson.model.BooleanParameterDefinition>
+        </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+    </properties>
+    <canRoam>true</canRoam>
+    <disabled>false</disabled>
+    <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+    <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <triggers/>
+    <concurrentBuild>false</concurrentBuild>
+    <builders>
+        <hudson.tasks.Shell>
+        <command>uname -a</command>
+        </hudson.tasks.Shell>
+    </builders>
+    <publishers/>
+    <buildWrappers/>
+    </project>
+yaml:
+    - project:
+        project-type: freestyle
+        block-downstream: false
+        block-upstream: false
+        concurrent: false
+        description: ''
+        parameters:
+            - string:
+                name: 'STR_PARAM'
+                default: ''
+                description: 'String something'
+            - bool:
+                name: 'BOOL_PARAM'
+                default: true
+                description: 'Boolean something'
+        builders:
+            - shell: |
+                uname -a
+
