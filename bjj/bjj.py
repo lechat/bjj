@@ -90,7 +90,8 @@ class TemplatedConverter(object):
         result = ''
         try:
             try:
-                part = resource_string(__name__, 'parts/' + el_name + '/base.part')
+                part = resource_string(__name__,
+                                       'parts/' + el_name + '/base.part')
                 tpl = self.env.from_string(part)
                 result = tpl.render(**el_data)
             except IOError:
@@ -120,7 +121,8 @@ class TemplatedConverter(object):
         """
         Converts one job to yaml string
         """
-        print json.dumps(et, indent=2)
+        if logger.level == logging.DEBUG:
+            print json.dumps(et, indent=2)
 
         # Top level element is parsed here
         job = self._parse_element(et.keys()[0], et)
