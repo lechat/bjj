@@ -1,4 +1,2 @@
 
     parameters:
-    {% block content %}
-    {% endblock %}
