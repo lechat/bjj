@@ -79,8 +79,9 @@ class JenkinsIterator(object):
 
 
 class TemplatedConverter(object):
-    def __init__(self, parts_path='parts'):
-        self.env = Environment(loader=PackageLoader('bjj', parts_path),
+    def __init__(self, tmpls_path='tmpls'):
+        self.tmpls_path = tmpls_path
+        self.env = Environment(loader=PackageLoader('bjj', tmpls_path),
                                trim_blocks=True,
                                lstrip_blocks=True,
                                line_statement_prefix='#',
@@ -88,29 +89,31 @@ class TemplatedConverter(object):
 
     def _parse_top_element(self, el_name, el_data):
         result = ''
+
         try:
             try:
-                part = resource_string(__name__,
-                                       'parts/' + el_name + '/base.part')
-                tpl = self.env.from_string(part)
+                tmpl = resource_string(
+                    __name__, self.tmpls_path + '/' + el_name + '/base.tmpl'
+                )
+                tpl = self.env.from_string(tmpl)
                 result = tpl.render(**el_data)
             except IOError:
                 pass
-            result += self._parse_element(el_name, el_data)
+            result += self._parse_element(el_name, el_data, self.tmpls_path)
 
             return result
         except IOError:
             raise NoTemplate(el_name)
 
-    def _parse_element(self, el_name, el_data, path='parts'):
+    def _parse_element(self, el_name, el_data, path='tmpls'):
         result = []
         if not isinstance(el_data, dict):
             raise NoTemplate(path)
         for el in el_data:
             try:
                 rel_path = path + '/' + el_name
-                part = resource_string(__name__, rel_path + '/' + el + '.part')
-                tpl = self.env.from_string(part)
+                tmpl = resource_string(__name__, rel_path + '/' + el + '.tmpl')
+                tpl = self.env.from_string(tmpl)
                 result.append(tpl.render(**el_data[el]))
             except IOError:
                 result.append(self._parse_element(el, el_data[el], rel_path))
@@ -134,7 +137,7 @@ class TemplatedConverter(object):
                 job += self._parse_top_element(name, data)
             except NoTemplate as tnf:
                 logger.warning(
-                    'Template "{}.part" not found. '
+                    'Template "{}.tmpl" not found. '
                     'Perhaps XML tag "{}" is not implemented yet'
                     .format(tnf.message, name))
         return job
