@@ -87,10 +87,19 @@ class TemplatedConverter(object):
                                line_comment_prefix='## ')
 
     def _parse_top_element(self, el_name, el_data):
-        part = resource_string(__name__, 'parts/' + el_name + '/base.part')
-        tpl = self.env.from_string(part)
-        result = tpl.render(**el_data[el_name])
-        result += self._parse_element(el_name, el_data)
+        result = ''
+        try:
+            try:
+                part = resource_string(__name__, 'parts/' + el_name + '/base.part')
+                tpl = self.env.from_string(part)
+                result = tpl.render(**el_data)
+            except IOError:
+                pass
+            result += self._parse_element(el_name, el_data)
+
+            return result
+        except IOError:
+            raise NoTemplate(el_name)
 
     def _parse_element(self, el_name, el_data, path='parts'):
         result = []
@@ -107,7 +116,7 @@ class TemplatedConverter(object):
 
         return ''.join(result)
 
-    def _convert(self, et, name):
+    def _convert(self, et):
         """
         Converts one job to yaml string
         """
@@ -134,7 +143,7 @@ class TemplatedConverter(object):
         """
         # TODO: if iterator has multiple items - make job-group of them
         for name, et in it:
-            yaml = self._convert(et, name)
+            yaml = self._convert(et)
             yaml_filename = name + '.yml'
             with open(yaml_filename, 'w') as of:
                 of.write(yaml)
