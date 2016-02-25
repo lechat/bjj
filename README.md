@@ -18,6 +18,10 @@ Options:
     --password PASS     Jenkins user's password or API token
 ```
 
+## Why "bjj" name?
+
+This small utility does reverse of what jenkins-job-builder (jjb) does, so it is reverse of "jjb".
+
 ## How does it work?
 
 1. Parse config.xml to python dict
@@ -40,7 +44,7 @@ Say, you need to add parser for String parameter (it is already in code, btw.) X
 				</hudson.model.StringParameterDefinition>
 			</parameterDefinitions>
         </hudson.model.ParametersDefinitionProperty>
-	<properties>
+	</properties>
 </project>
 ```
 
