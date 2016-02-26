@@ -15,7 +15,7 @@ def find_file_pairs():
             test_case = yaml.load(open(join(path, name), 'r'))
 
             xml_dict = xmltodict.parse(test_case['xml'])
-            if isinstance(test_case['yaml'], dict or list):
+            if isinstance(test_case['yaml'], (dict, list)):
                 yaml_dict = test_case['yaml']
             else:
                 yaml_dict = yaml.load(test_case['yaml'])
