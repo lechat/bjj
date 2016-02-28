@@ -2,9 +2,9 @@
 Convert Jenkins job definition to jenkins-job-builder yaml
 
 Usage:
-    bjj.py convertfile --path PATH...
-    bjj.py convertjob --jenkins-url URL --job-regex REGEX [--user USER]
-           [--password PASS]
+    bjj.py convertfile --path PATH... [--outpath PATH]
+    bjj.py convertjobs --jenkins-url URL [--job-regex REGEX] [--user USER]
+           [--password PASS] [--outpath PATH]
 
 Options:
     --path PATH         File to convert from
@@ -12,6 +12,7 @@ Options:
     --job-regex REGEX   Regular expression to find jobs [Default: .*]
     --user USER         Jenkins user name
     --password PASS     Jenkins user's password or API token
+    --outpath PATH      Path to store YAMLs [Default: ./]
 """
 from docopt import docopt
 import logging
@@ -20,6 +21,9 @@ import yaml
 from jinja2 import Environment, PackageLoader
 import xmltodict
 import json
+import re
+from os.path import basename
+from posixpath import join
 from pkg_resources import resource_string
 
 
@@ -38,6 +42,10 @@ def literal_unicode_representer(dumper, data):
 yaml.add_representer(literal_unicode, literal_unicode_representer)
 
 
+class NoTemplate(Exception):
+    pass
+
+
 class FileIterator(object):
     def __init__(self, files):
         if isinstance(files, str):
@@ -47,7 +55,7 @@ class FileIterator(object):
 
     def __iter__(self):
         for xml_file in self.files:
-            yield xml_file, self._et_from_file(xml_file)
+            yield basename(xml_file), self._et_from_file(xml_file)
 
     def __len__(self):
         return len(self.files)
@@ -58,34 +66,37 @@ class FileIterator(object):
         return x_dict
 
 
-class NoTemplate(Exception):
-    pass
-
-
 class JenkinsIterator(object):
-    def __init__(self, jenkins_url, user, passwd, regex):
+    def __init__(self, jenkins_url, user, passwd, regex=None):
         self.jenkins = Jenkins(jenkins_url, user, passwd)
-        self.regex = regex
+        if regex is not None:
+            self.regex = re.compile(regex)
+        else:
+            self.regex = None
 
     def __iter__(self):
-        for job_name in self.jenkins.jobs:
-            # if regex matches
-            # get job xml as string
-            job_config = ""
+        for job_name in self.jenkins.jobs.iterkeys():
+            if self.regex is not None:
+                if re.search(self.regex, job_name) is not None:
+                    job_config = self.jenkins.jobs[job_name].get_config()
+            else:
+                job_config = self.jenkins.jobs[job_name].get_config()
+
             yield job_name, self._et_from_string(job_config)
 
-    def _et_from_string(xml_string):
+    def _et_from_string(self, xml_string):
         return xmltodict.parse(xml_string)
 
 
 class TemplatedConverter(object):
-    def __init__(self, tmpls_path='tmpls'):
+    def __init__(self, tmpls_path='tmpls', save_path='./'):
         self.tmpls_path = tmpls_path
         self.env = Environment(loader=PackageLoader('bjj', tmpls_path),
                                trim_blocks=True,
                                lstrip_blocks=True,
                                line_statement_prefix='#',
                                line_comment_prefix='## ')
+        self.save_path = save_path
 
     def _parse_top_element(self, el_name, el_data):
         result = ''
@@ -149,7 +160,8 @@ class TemplatedConverter(object):
         # TODO: if iterator has multiple items - make job-group of them
         for name, et in it:
             yaml = self._convert(et)
-            yaml_filename = name + '.yml'
+            yaml_filename = join(self.save_path, name + '.yml')
+            logger.info('Writing yaml to %s' % yaml_filename)
             with open(yaml_filename, 'w') as of:
                 of.write(yaml)
 
@@ -167,7 +179,7 @@ def main():
             args['--job-regex']
         )
 
-    TemplatedConverter().convert(conv)
+    TemplatedConverter(save_path=args['--outpath']).convert(conv)
 
 
 if __name__ == '__main__':
