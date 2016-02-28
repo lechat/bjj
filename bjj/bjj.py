@@ -2,8 +2,8 @@
 Convert Jenkins job definition to jenkins-job-builder yaml
 
 Usage:
-    bjj.py convertfile --path PATH... [--outpath PATH]
-    bjj.py convertjobs --jenkins-url URL [--job-regex REGEX] [--user USER]
+    bjj.py [-v] files --path PATH... [--outpath PATH]
+    bjj.py [-v] jenkins --jenkins-url URL [--job-regex REGEX] [--user USER]
            [--password PASS] [--outpath PATH]
 
 Options:
@@ -13,6 +13,7 @@ Options:
     --user USER         Jenkins user name
     --password PASS     Jenkins user's password or API token
     --outpath PATH      Path to store YAMLs [Default: ./]
+    -v --verbose        Verbose output
 """
 from docopt import docopt
 import logging
@@ -28,6 +29,7 @@ from pkg_resources import resource_string
 
 
 logging.basicConfig(level=logging.INFO)
+logging.getLogger('requests').setLevel(logging.CRITICAL)
 logger = logging.getLogger('bjj')
 
 
@@ -169,7 +171,11 @@ class TemplatedConverter(object):
 def main():
     args = docopt(__doc__)
 
-    if args['convertfile']:
+    if args['--verbose']:
+        logger.setLevel(logging.DEBUG)
+        logger.debug('Verbose logging requested')
+
+    if args['files']:
         conv = FileIterator(args['--path'])
     else:
         conv = JenkinsIterator(
