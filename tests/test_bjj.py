@@ -1,4 +1,5 @@
 from bjj import bjj
+import os
 
 
 def test_fileiterator(tmpdir):
@@ -13,7 +14,7 @@ def test_fileiterator(tmpdir):
     count = 0
     for name, content in fi:
         count += 1
-        assert name == str(xml)
+        assert name == os.path.basename(str(xml))
         assert isinstance(content, dict)
         assert content == {'some': 'xml'}
 
