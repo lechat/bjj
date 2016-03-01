@@ -78,13 +78,15 @@ class JenkinsIterator(object):
 
     def __iter__(self):
         for job_name in self.jenkins.jobs.iterkeys():
+            job_config = None
             if self.regex is not None:
                 if re.search(self.regex, job_name) is not None:
                     job_config = self.jenkins.jobs[job_name].get_config()
             else:
                 job_config = self.jenkins.jobs[job_name].get_config()
 
-            yield job_name, self._et_from_string(job_config)
+            if job_config is not None:
+                yield job_name, self._et_from_string(job_config)
 
     def _et_from_string(self, xml_string):
         return xmltodict.parse(xml_string)
@@ -110,28 +112,65 @@ class TemplatedConverter(object):
                 )
                 tpl = self.env.from_string(tmpl)
                 result = tpl.render(**el_data)
+                if el_name == 'logRotator':
+                    return result
             except IOError:
                 pass
-            result += self._parse_element(el_name, el_data, self.tmpls_path)
+            if el_name == 'scm':
+                parsed_children = self._parse_element(
+                    el_data['@class'],
+                    el_data,
+                    self.tmpls_path
+                )
+            else:
+                parsed_children = self._parse_element(
+                    el_name,
+                    el_data,
+                    self.tmpls_path
+                )
+            if len(parsed_children) == 0:
+                logger.warning(
+                    'Template "{}.tmpl" not found. '
+                    'Perhaps XML tag "{}" is not implemented yet'
+                    .format(el_name, el_name))
+            result += parsed_children
 
             return result
         except IOError:
             raise NoTemplate(el_name)
 
     def _parse_element(self, el_name, el_data, path='tmpls'):
+        logger.debug('Parsing element "%s"' % el_name)
         result = []
+
         if not isinstance(el_data, dict):
-            raise NoTemplate(path)
+            return ''
         for el in el_data:
+            if el.encode('ascii')[0] == '@':
+                continue
+
             try:
                 rel_path = path + '/' + el_name
-                tmpl = resource_string(__name__, rel_path + '/' + el + '.tmpl')
+                tmpl_path = rel_path + '/' + el + '.tmpl'
+                logger.debug('Trying to find template "%s"' % tmpl_path)
+                tmpl = resource_string(__name__, tmpl_path)
                 tpl = self.env.from_string(tmpl)
-                result.append(tpl.render(**el_data[el]))
+                if isinstance(el_data[el], list):
+                    for item in el_data[el]:
+                        result.append(tpl.render(**item))
+                else:
+                    result.append(tpl.render(**el_data[el]))
             except IOError:
                 result.append(self._parse_element(el, el_data[el], rel_path))
 
-        return ''.join(result)
+        joined = ''.join(result)
+        if len(joined.strip()) == 0:
+            logger.warning(
+                'Template "{}.tmpl" not found. '
+                'Perhaps XML tag "{}" is not implemented yet'
+                .format(el_name, el_name))
+
+        return joined
 
     def _convert(self, et):
         """
